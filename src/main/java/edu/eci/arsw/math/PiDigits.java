@@ -1,5 +1,13 @@
 package edu.eci.arsw.math;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.omg.CORBA.DATA_CONVERSION;
+
 ///  <summary>
 ///  An implementation of the Bailey-Borwein-Plouffe formula for calculating hexadecimal
 ///  digits of pi.
@@ -8,8 +16,37 @@ package edu.eci.arsw.math;
 ///  </summary>
 public class PiDigits {
 
-    private static int DigitsPerSum = 8;
+    
     private static double Epsilon = 1e-17;
+    private ArrayList<PiDigitsThread> threads;
+    public AtomicInteger digitsCounted;
+    
+    /**
+     * 
+     * @param count
+     * @param N
+     */
+    public void divideRange(int start, int count, int N, Object lock){
+        int startRangeThread = start;
+        int digitsPerThread  = count / N;
+        int extraDigit = count % N;
+        
+        this.threads = new ArrayList<>();
+        this.digitsCounted = new AtomicInteger();
+
+        for(int i = 0; i < N; i++){
+            if(extraDigit > i){
+                digitsPerThread += 1;
+            }
+            System.out.println("THREAD " + i + " start " + startRangeThread + " count " + digitsPerThread );
+            threads.add(new PiDigitsThread(startRangeThread, digitsPerThread, digitsCounted, lock));
+
+            threads.get(i).start();
+            startRangeThread += digitsPerThread;
+            digitsPerThread = count / N;
+        }
+
+    }
 
     
     /**
@@ -18,30 +55,22 @@ public class PiDigits {
      * @param count The number of digits to return
      * @return An array containing the hexadecimal digits.
      */
-    public static byte[] getDigits(int start, int count) {
-        if (start < 0) {
-            throw new RuntimeException("Invalid Interval");
-        }
+    public LinkedList<Byte> getDigits(int start, int count, int N) {
+        Object sharedLock = new Object();
 
-        if (count < 0) {
-            throw new RuntimeException("Invalid Interval");
-        }
+        divideRange(start ,count, N, sharedLock);
 
-        byte[] digits = new byte[count];
-        double sum = 0;
-
-        for (int i = 0; i < count; i++) {
-            if (i % DigitsPerSum == 0) {
-                sum = 4 * sum(1, start)
-                        - 2 * sum(4, start)
-                        - sum(5, start)
-                        - sum(6, start);
-
-                start += DigitsPerSum;
+        for(PiDigitsThread pdt: threads){
+            try {
+                pdt.join();
+            } catch (InterruptedException e) {
+                
+                e.printStackTrace();
             }
-
-            sum = 16 * (sum - Math.floor(sum));
-            digits[i] = (byte) sum;
+        }
+        LinkedList<Byte> digits = new LinkedList<>();
+        for(PiDigitsThread pdt: threads){
+            digits.addAll(pdt.digitsCalculated);
         }
 
         return digits;
