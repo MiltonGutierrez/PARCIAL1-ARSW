@@ -22,7 +22,7 @@ public class Main {
 
         PiDigits pd =  new PiDigits();
 
-        System.out.println(bytesToHex(pd.getDigits(0, 1000000, 500)));
+        System.out.println(bytesToHex(pd.getDigits(0, 1000000, 100)));
     }
 
     private final static char[] hexArray = "0123456789ABCDEF".toCharArray();

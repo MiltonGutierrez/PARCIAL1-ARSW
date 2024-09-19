@@ -50,9 +50,9 @@ public class PiDigitsThread extends Thread {
     
                 sum = 16 * (sum - Math.floor(sum));
                 digitsCalculated.add((byte) sum);
-                synchronized(sharedDigitsCounted){
-                    sharedDigitsCounted.incrementAndGet();
-                }
+                
+                sharedDigitsCounted.incrementAndGet();
+                
                 i++;
             }
             else{

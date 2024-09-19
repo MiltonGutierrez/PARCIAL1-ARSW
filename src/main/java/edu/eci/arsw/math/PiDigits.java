@@ -77,12 +77,11 @@ public class PiDigits {
             Scanner sc = new Scanner(System.in);
             String input = sc.nextLine();
 
+            allAlive = false;
             for(PiDigitsThread ptd: threads){
                 if(ptd.isAlive()){
-                    break;
-                }
-                else{
-                    allAlive = false;
+                    allAlive = true;
+                    ptd.resumeTread();
                 }
             }
 
