@@ -18,6 +18,7 @@ import org.omg.CORBA.DATA_CONVERSION;
 public class PiDigits {
 
     
+    private static int DigitsPerSum = 8;
     private static double Epsilon = 1e-17;
     private ArrayList<PiDigitsThread> threads;
     public AtomicInteger digitsCounted;
@@ -48,13 +49,36 @@ public class PiDigits {
 
     }
 
-    public LinkedList<Byte> getDigits(int start, int count) {
-        return null;
-        
-    
+    public static byte[] getDigits(int start, int count) {
+        if (start < 0) {
+            throw new RuntimeException("Invalid Interval");
+        }
+
+        if (count < 0) {
+            throw new RuntimeException("Invalid Interval");
+        }
+
+        byte[] digits = new byte[count];
+        double sum = 0;
+
+        for (int i = 0; i < count; i++) {
+            if (i % DigitsPerSum == 0) {
+                sum = 4 * sum(1, start)
+                        - 2 * sum(4, start)
+                        - sum(5, start)
+                        - sum(6, start);
+
+                start += DigitsPerSum;
+            }
+
+            sum = 16 * (sum - Math.floor(sum));
+            digits[i] = (byte) sum;
+        }
+
+        return digits;
+
     }
 
-    
     /**
      * Returns a range of hexadecimal digits of pi.
      * @param start The starting location of the range.
