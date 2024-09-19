@@ -86,6 +86,7 @@ public class PiDigits {
             }
 
         }
+
         LinkedList<Byte> digits = new LinkedList<>();
         for(PiDigitsThread pdt: threads){
             digits.addAll(pdt.digitsCalculated);
