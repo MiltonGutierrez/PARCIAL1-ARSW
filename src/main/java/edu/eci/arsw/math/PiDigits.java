@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.omg.CORBA.DATA_CONVERSION;
@@ -26,20 +27,19 @@ public class PiDigits {
      * @param count
      * @param N
      */
-    public void divideRange(int start, int count, int N, Object lock){
+    public void divideRange(int start, int count, int N){
         int startRangeThread = start;
         int digitsPerThread  = count / N;
         int extraDigit = count % N;
         
         this.threads = new ArrayList<>();
-        this.digitsCounted = new AtomicInteger();
+        this.digitsCounted = new AtomicInteger(0);
 
         for(int i = 0; i < N; i++){
             if(extraDigit > i){
                 digitsPerThread += 1;
             }
-            System.out.println("THREAD " + i + " start " + startRangeThread + " count " + digitsPerThread );
-            threads.add(new PiDigitsThread(startRangeThread, digitsPerThread, digitsCounted, lock));
+            threads.add(new PiDigitsThread(startRangeThread, digitsPerThread, digitsCounted, new Object()));
 
             threads.get(i).start();
             startRangeThread += digitsPerThread;
@@ -47,6 +47,8 @@ public class PiDigits {
         }
 
     }
+
+
 
     
     /**
@@ -56,23 +58,39 @@ public class PiDigits {
      * @return An array containing the hexadecimal digits.
      */
     public LinkedList<Byte> getDigits(int start, int count, int N) {
-        Object sharedLock = new Object();
 
-        divideRange(start ,count, N, sharedLock);
-
-        for(PiDigitsThread pdt: threads){
+        boolean allAlive = true;
+        divideRange(start ,count, N);
+        while(allAlive){
             try {
-                pdt.join();
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
-                
                 e.printStackTrace();
             }
+
+            for(PiDigitsThread ptd: threads){
+                ptd.stopThread();
+            }
+
+            System.out.println("Digitos calculados: " + digitsCounted.get());
+            System.out.println("Presiona enter para continuar");
+            Scanner sc = new Scanner(System.in);
+            String input = sc.nextLine();
+
+            for(PiDigitsThread ptd: threads){
+                if(ptd.isAlive()){
+                    break;
+                }
+                else{
+                    allAlive = false;
+                }
+            }
+
         }
         LinkedList<Byte> digits = new LinkedList<>();
         for(PiDigitsThread pdt: threads){
             digits.addAll(pdt.digitsCalculated);
         }
-
         return digits;
     }
 

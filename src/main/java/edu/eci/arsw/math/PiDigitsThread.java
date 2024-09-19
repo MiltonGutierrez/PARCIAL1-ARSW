@@ -11,6 +11,7 @@ public class PiDigitsThread extends Thread {
     public AtomicInteger sharedDigitsCounted;
     private Object lock;
     public LinkedList<Byte> digitsCalculated;
+    public boolean running = true;
     //Atributos base de PiDigits
     private static int DigitsPerSum = 8;
     private static double Epsilon = 1e-17;
@@ -26,16 +27,6 @@ public class PiDigitsThread extends Thread {
 
     @Override
     public void run(){
-        this.getDigits(start, count);
-    }
-
-    /**
-     * Returns a range of hexadecimal digits of pi.
-     * @param start The starting location of the range.
-     * @param count The number of digits to return
-     * @return An array containing the hexadecimal digits.
-     */
-    public void getDigits(int start, int count) {
         if (start < 0) {
             throw new RuntimeException("Invalid Interval");
         }
@@ -45,21 +36,48 @@ public class PiDigitsThread extends Thread {
         }
 
         double sum = 0;
-
-        for (int i = 0; i < count; i++) {
-            if (i % DigitsPerSum == 0) {
-                sum = 4 * sum(1, start)
-                        - 2 * sum(4, start)
-                        - sum(5, start)
-                        - sum(6, start);
-
-                start += DigitsPerSum;
+        int i = 0;
+        while(i < count){
+            if(running){
+                if (i % DigitsPerSum == 0) {
+                    sum = 4 * sum(1, start)
+                            - 2 * sum(4, start)
+                            - sum(5, start)
+                            - sum(6, start);
+    
+                    start += DigitsPerSum;
+                }
+    
+                sum = 16 * (sum - Math.floor(sum));
+                digitsCalculated.add((byte) sum);
+                synchronized(sharedDigitsCounted){
+                    sharedDigitsCounted.incrementAndGet();
+                }
+                i++;
             }
-
-            sum = 16 * (sum - Math.floor(sum));
-            digitsCalculated.add((byte) sum);
+            else{
+                synchronized(lock){
+                    try {
+                        lock.wait();
+                    } catch (Exception e) {
+                    }
+                    
+                }
+            }
+            
         }
-}
+    }
+
+    public void stopThread(){
+        running = false;
+    }
+
+    public void resumeTread(){
+        running = true;
+        synchronized(lock){
+            lock.notifyAll();
+        }
+    }
 
 
 /// <summary>
