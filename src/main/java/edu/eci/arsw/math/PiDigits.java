@@ -48,7 +48,11 @@ public class PiDigits {
 
     }
 
-
+    public LinkedList<Byte> getDigits(int start, int count) {
+        return null;
+        
+    
+    }
 
     
     /**
