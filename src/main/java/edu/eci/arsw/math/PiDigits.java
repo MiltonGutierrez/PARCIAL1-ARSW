@@ -85,6 +85,30 @@ public class PiDigits {
      * @param count The number of digits to return
      * @return An array containing the hexadecimal digits.
      */
+    public LinkedList<Byte> getDigitsNoWaiting(int start, int count, int N) {
+        divideRange(start ,count, N);
+        for(PiDigitsThread ptd: threads){
+            try {
+                ptd.join();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        LinkedList<Byte> digits = new LinkedList<>();
+        for(PiDigitsThread pdt: threads){
+            digits.addAll(pdt.digitsCalculated);
+        }
+        return digits;
+    }
+
+
+    /**
+     * Returns a range of hexadecimal digits of pi.
+     * @param start The starting location of the range.
+     * @param count The number of digits to return
+     * @return An array containing the hexadecimal digits.
+     */
     public LinkedList<Byte> getDigits(int start, int count, int N) {
 
         boolean allAlive = true;
@@ -114,7 +138,6 @@ public class PiDigits {
             }
 
         }
-
         LinkedList<Byte> digits = new LinkedList<>();
         for(PiDigitsThread pdt: threads){
             digits.addAll(pdt.digitsCalculated);

@@ -16,12 +16,24 @@ import java.util.LinkedList;
 public class Main {
 
     public static void main(String a[]) {
-        //Con threads
         PiDigits pd =  new PiDigits();
         System.out.println(bytesToHex(pd.getDigits(0, 20000, 11)));
+
+        /* COMPARACION SIN TIEMPO DE ESPERA (5 segundos luego presionar enter)
+        //Con threads
+        PiDigits pd =  new PiDigits();
+        long inicioThreads = System.currentTimeMillis();
+        System.out.println(bytesToHex(pd.getDigitsNoWaiting(0, 20000, 11)));
+        long finalThreads = System.currentTimeMillis();
+
+        System.out.println("tiempo threads: " + (finalThreads - inicioThreads));
+        
         //Sin threads
         System.out.println("\n");
-        //System.out.println(bytesToHex(PiDigits.getDigits(0, 10000)));
+        long inicioNoThreads = System.currentTimeMillis();
+        System.out.println(bytesToHex(PiDigits.getDigits(0, 20000)));
+        long finalNoThreads = System.currentTimeMillis();
+        System.out.println("tiempo no treads: " + (finalNoThreads - inicioNoThreads));*/
     }
 
     private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
